@@ -19,7 +19,7 @@ with open('index.html', 'r') as the_file:
 print("rendering...")
 
 uptime = str(datetime.timedelta(seconds=uptime_sec()))
-temp = subprocess.run(["/opt/vc/bin/vcgencmd", "measure_temp"], capture_output=True).stdout.decode('utf-8')[5:-1]
+temp = subprocess.run(["/opt/vc/bin/vcgencmd", "measure_temp"], capture_output=True).stdout.decode('utf-8')[5:-1].replace('\'', '°')
 
 data = {
     "temp": temp,
