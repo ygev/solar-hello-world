@@ -14,13 +14,33 @@
             padding: 2em 1em;
             font-size: 2em;
         }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 4em;
+        }
+        aside {
+            margin-left: auto;
+        }
+        img {
+            max-width: 100%;
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
-    <h1>kians solar panel</h1>
-    <p>temperature: {{ temp }}</p>
-    <p>uptime: {{ uptime }}</p>
-    <p>last updated: {{ time }} UTC</p>
+    <main>
+        <section>
+            <h1>kians solar panel</h1>
+            <p>temperature: {{ temp }}</p>
+            <p>uptime: {{ uptime }}</p>
+            <p>last updated: {{ time }} UTC</p>
+        </section>
+
+        <aside>
+            <img src="solarpanel.jpg" alt="solar panel" />
+        </aside>
+    </main>
 </body>
 </html>
 
