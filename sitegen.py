@@ -7,6 +7,8 @@ import datetime
 import jinja2
 import subprocess
 import time
+import pytz
+from datetime import datetime
 from adafruit_lc709203f import LC709203F
 
 sensor = LC709203F(board.I2C())
@@ -28,12 +30,17 @@ while True:
         except Exception as err:
             battery = err
 
+        tz = pytz.timezone('America/Los_Angeles')
+        dt = datetime.now(tz)
+        now = dt.strftime('%c %Z')
+
         data = {
             "temp": temp,
             "uptime": uptime,
             "battery": battery,
-            "time": time.ctime()
+            "time": now
         }
+        print(data)
         rendered = jinja2.Template(template).render(data)
 
         print("writing to file...")
