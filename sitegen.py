@@ -7,12 +7,19 @@ import datetime
 import jinja2
 import subprocess
 import time
+import os
 import pytz
 from datetime import datetime
 from adafruit_lc709203f import LC709203F
+import rrdtool
+
+# create new rrd database
+#rrdtool.create("battery.rrd", "--step", "300", "DS:battery:GAUGE:600:0:100", "RRA:AVERAGE:0.5:1:288", "RRA:AVERAGE:0.5:1:2016")
 
 sensor = LC709203F(board.I2C())
 print("Battery monitor chip version:", hex(sensor.ic_version))
+
+outdir = "/var/www/html"
 
 while True:
     try:
@@ -25,14 +32,20 @@ while True:
         uptime = subprocess.run(["/usr/bin/uptime", "-p"], capture_output=True).stdout.decode('utf-8')[3:]
         temp = subprocess.run(["/opt/vc/bin/vcgencmd", "measure_temp"], capture_output=True).stdout.decode('utf-8')[5:-1].replace('\'', '°')
 
-        try:
-            battery = "%0.1f%% (%0.3fv)" % (sensor.cell_percent, sensor.cell_voltage)
-        except Exception as err:
-            battery = err
-
         tz = pytz.timezone('America/Los_Angeles')
         dt = datetime.now(tz)
         now = dt.strftime('%c %Z')
+
+        # display rrd graph in correct timezone
+        os.environ['TZ'] = 'America/Los_Angeles'
+        time.tzset()
+
+        try:
+            battery = "%0.1f%% (%0.3fv)" % (sensor.cell_percent, sensor.cell_voltage)
+            rrdtool.update("battery.rrd", f"N:{sensor.cell_percent}")
+            rrdtool.graph(f"{outdir}/battery-24h.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (24h)", "--zoom", "2")
+        except Exception as err:
+            battery = err
 
         data = {
             "temp": temp,
@@ -44,7 +57,7 @@ while True:
         rendered = jinja2.Template(template).render(data)
 
         print("writing to file...")
-        with open('/var/www/html/index.html', 'w') as the_file:
+        with open(f"{outdir}/index.html", "w") as the_file:
             the_file.write(rendered)
 
         print("done")
