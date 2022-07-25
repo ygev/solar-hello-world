@@ -43,7 +43,8 @@ while True:
         try:
             battery = "%0.1f%% (%0.3fv)" % (sensor.cell_percent, sensor.cell_voltage)
             rrdtool.update("battery.rrd", f"N:{sensor.cell_percent}")
-            rrdtool.graph(f"{outdir}/battery-24h.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (24h)", "--zoom", "2")
+            rrdtool.graph(f"{outdir}/battery-24h.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (24h)", "--zoom", "1.5")
+            rrdtool.graph(f"{outdir}/battery-7d.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (7d)", "--zoom", "1.5", "--end", "now", "--start", "end-7d")
         except Exception as err:
             battery = err
 
