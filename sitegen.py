@@ -13,8 +13,10 @@ from datetime import datetime
 from adafruit_lc709203f import LC709203F
 import rrdtool
 
-# create new rrd database
+# create new 7d rrd database
 #rrdtool.create("battery.rrd", "--step", "300", "DS:battery:GAUGE:600:0:100", "RRA:AVERAGE:0.5:1:288", "RRA:AVERAGE:0.5:1:2016")
+# longer term (should be good for 50 years)
+#rrdtool.create("battery.rrd", "--step", "300", "DS:battery:GAUGE:600:0:100", "RRA:AVERAGE:0.5:1:5256000")
 
 sensor = LC709203F(board.I2C())
 print("Battery monitor chip version:", hex(sensor.ic_version))
@@ -45,6 +47,7 @@ while True:
             rrdtool.update("battery.rrd", f"N:{sensor.cell_percent}")
             rrdtool.graph(f"{outdir}/battery-24h.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (24h)", "--zoom", "1.5")
             rrdtool.graph(f"{outdir}/battery-7d.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (7d)", "--zoom", "1.5", "--end", "now", "--start", "end-7d")
+            rrdtool.graph(f"{outdir}/battery-90d.png", "DEF:bat=battery.rrd:battery:AVERAGE", "LINE2:bat#FF0000", "-l", "0", "-u", "100", "-v", "percent", "-t", "battery level (90d)", "--zoom", "1.5", "--end", "now", "--start", "end-90d")
         except Exception as err:
             battery = err
 
